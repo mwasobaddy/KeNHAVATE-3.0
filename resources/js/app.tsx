@@ -2,8 +2,11 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import axios from 'axios';
 import '../css/app.css';
 import { initializeTheme } from './hooks/use-appearance';
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -30,3 +33,33 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+// Initialize Laravel Echo for real-time features
+window.Pusher = Pusher;
+
+window.Echo = new Echo({
+    broadcaster: 'pusher',
+    key: import.meta.env.VITE_PUSHER_APP_KEY,
+    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
+    wsHost: import.meta.env.VITE_PUSHER_HOST ? import.meta.env.VITE_PUSHER_HOST : `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusherapp.com`,
+    wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
+    wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
+    forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
+    enabledTransports: ['ws', 'wss'],
+    authorizer: (channel: any, options: any) => {
+        return {
+            authorize: (socketId: string, callback: Function) => {
+                axios.post('/broadcasting/auth', {
+                    socket_id: socketId,
+                    channel_name: channel.name
+                })
+                .then(response => {
+                    callback(false, response.data);
+                })
+                .catch(error => {
+                    callback(true, error);
+                });
+            }
+        };
+    },
+});
