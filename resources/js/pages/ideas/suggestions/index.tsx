@@ -213,14 +213,14 @@ export default function Index({ idea, suggestions: initialSuggestions, stats, fi
                                 <div>
                                     <Label>Status</Label>
                                     <Select
-                                        value={filters.status || ''}
-                                        onValueChange={(value) => handleFilterChange('status', value)}
+                                        value={filters.status || 'all'}
+                                        onValueChange={(value) => handleFilterChange('status', value === 'all' ? '' : value)}
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="All Status" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">All Status</SelectItem>
+                                            <SelectItem value="all">All Status</SelectItem>
                                             <SelectItem value="pending">Pending</SelectItem>
                                             <SelectItem value="accepted">Accepted</SelectItem>
                                             <SelectItem value="rejected">Rejected</SelectItem>
@@ -231,14 +231,14 @@ export default function Index({ idea, suggestions: initialSuggestions, stats, fi
                                 <div>
                                     <Label>Type</Label>
                                     <Select
-                                        value={filters.type || ''}
-                                        onValueChange={(value) => handleFilterChange('type', value)}
+                                        value={filters.type || 'all'}
+                                        onValueChange={(value) => handleFilterChange('type', value === 'all' ? '' : value)}
                                     >
                                         <SelectTrigger>
                                             <SelectValue placeholder="All Types" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">All Types</SelectItem>
+                                            <SelectItem value="all">All Types</SelectItem>
                                             <SelectItem value="improvement">Improvement</SelectItem>
                                             <SelectItem value="question">Question</SelectItem>
                                             <SelectItem value="concern">Concern</SelectItem>

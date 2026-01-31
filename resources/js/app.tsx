@@ -42,33 +42,56 @@ createInertiaApp({
 // This will set light / dark mode on load...
 initializeTheme();
 
-// Initialize Laravel Echo for real-time features
-window.Pusher = Pusher;
+// Initialize Laravel Echo for real-time features (only if properly configured)
+const pusherKey = import.meta.env.VITE_PUSHER_APP_KEY;
+const pusherCluster = import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1';
 
-window.Echo = new Echo({
-    broadcaster: 'pusher',
-    key: import.meta.env.VITE_PUSHER_APP_KEY,
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
-    wsHost: import.meta.env.VITE_PUSHER_HOST ? import.meta.env.VITE_PUSHER_HOST : `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusherapp.com`,
-    wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
-    wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
-    forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
-    enabledTransports: ['ws', 'wss'],
-    authorizer: (channel: { name: string }) => {
-        return {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-            authorize: (socketId: string, callback: Function) => {
-                axios.post('/broadcasting/auth', {
-                    socket_id: socketId,
-                    channel_name: channel.name
-                })
-                .then(response => {
-                    callback(false, response.data);
-                })
-                .catch(error => {
-                    callback(true, error);
-                });
-            }
-        };
-    },
-});
+if (pusherKey && pusherKey !== 'local' && pusherCluster && pusherCluster !== 'local') {
+    window.Pusher = Pusher;
+
+    window.Echo = new Echo({
+        broadcaster: 'pusher',
+        key: pusherKey,
+        cluster: pusherCluster,
+        wsHost: import.meta.env.VITE_PUSHER_HOST ? import.meta.env.VITE_PUSHER_HOST : `ws-${pusherCluster}.pusherapp.com`,
+        wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
+        wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
+        forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
+        enabledTransports: ['ws', 'wss'],
+        authorizer: (channel: { name: string }) => {
+            return {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+                authorize: (socketId: string, callback: Function) => {
+                    axios.post('/broadcasting/auth', {
+                        socket_id: socketId,
+                        channel_name: channel.name
+                    })
+                    .then(response => {
+                        callback(false, response.data);
+                    })
+                    .catch(error => {
+                        callback(true, error);
+                    });
+                }
+            };
+        },
+    });
+} else {
+    // For local development without Pusher, create a mock Echo instance
+    window.Echo = {
+        channel: () => ({
+            listen: () => ({})
+        }),
+        private: () => ({
+            listen: () => ({})
+        }),
+        join: () => ({
+            here: () => ({}),
+            joining: () => ({}),
+            leaving: () => ({}),
+            listen: () => ({})
+        }),
+        leave: () => ({}),
+        leaveChannel: () => ({})
+    } as any;
+}

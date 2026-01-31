@@ -108,14 +108,14 @@ export default function Index({ ideas, categories, filters }: IdeasIndexProps) {
                             </form>
 
                             <Select
-                                value={filters.category_id || ''}
-                                onValueChange={(value) => handleFilterChange('category_id', value)}
+                                value={filters.category_id || 'all'}
+                                onValueChange={(value) => handleFilterChange('category_id', value === 'all' ? '' : value)}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="All Categories" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All Categories</SelectItem>
+                                    <SelectItem value="all">All Categories</SelectItem>
                                     {categories.map((category) => (
                                         <SelectItem key={category.id} value={category.id.toString()}>
                                             {category.name}
@@ -125,14 +125,14 @@ export default function Index({ ideas, categories, filters }: IdeasIndexProps) {
                             </Select>
 
                             <Select
-                                value={filters.status || ''}
-                                onValueChange={(value) => handleFilterChange('status', value)}
+                                value={filters.status || 'all'}
+                                onValueChange={(value) => handleFilterChange('status', value === 'all' ? '' : value)}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="All Status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All Status</SelectItem>
+                                    <SelectItem value="all">All Status</SelectItem>
                                     <SelectItem value="submitted">Submitted</SelectItem>
                                     <SelectItem value="under_review">Under Review</SelectItem>
                                     <SelectItem value="approved">Approved</SelectItem>
@@ -141,14 +141,14 @@ export default function Index({ ideas, categories, filters }: IdeasIndexProps) {
                             </Select>
 
                             <Select
-                                value={filters.collaboration_enabled || ''}
-                                onValueChange={(value) => handleFilterChange('collaboration_enabled', value)}
+                                value={filters.collaboration_enabled || 'all'}
+                                onValueChange={(value) => handleFilterChange('collaboration_enabled', value === 'all' ? '' : value)}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="All Ideas" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All Ideas</SelectItem>
+                                    <SelectItem value="all">All Ideas</SelectItem>
                                     <SelectItem value="1">Open for Collaboration</SelectItem>
                                 </SelectContent>
                             </Select>
