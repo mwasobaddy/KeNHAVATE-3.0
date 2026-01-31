@@ -9,6 +9,7 @@ use App\Models\Suggestion;
 use App\Models\User;
 use App\Models\UserEngagementMetric;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -56,8 +57,10 @@ class AnalyticsService
     /**
      * Get individual user engagement metrics.
      */
-    private function getUserEngagementMetrics(User $user, Carbon $startDate, Carbon $endDate): array
+    private function getUserEngagementMetrics(User $user, Carbon|CarbonImmutable $startDate, Carbon|CarbonImmutable $endDate): array
     {
+        $days = $startDate->diffInDays($endDate) + 1; // +1 to include both start and end dates
+
         $metrics = UserEngagementMetric::where('user_id', $user->id)
             ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
             ->orderBy('date')
@@ -96,7 +99,7 @@ class AnalyticsService
     /**
      * Get system-wide engagement metrics.
      */
-    private function getSystemEngagementMetrics(Carbon $startDate, Carbon $endDate): array
+    private function getSystemEngagementMetrics(Carbon|CarbonImmutable $startDate, Carbon|CarbonImmutable $endDate): array
     {
         $metrics = UserEngagementMetric::whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
             ->selectRaw('
@@ -368,7 +371,7 @@ class AnalyticsService
     /**
      * Get system trends over time.
      */
-    private function getSystemTrends(Carbon $startDate, Carbon $endDate): array
+    private function getSystemTrends(Carbon|CarbonImmutable $startDate, Carbon|CarbonImmutable $endDate): array
     {
         $dailyMetrics = UserEngagementMetric::whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
             ->selectRaw('date, SUM(login_count) as logins, SUM(ideas_created) as ideas, SUM(points_earned) as points, AVG(engagement_score) as avg_engagement')
