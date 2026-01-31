@@ -32,7 +32,7 @@ class IdeaController extends Controller
 
         $categories = IdeaCategory::all();
 
-        return Inertia::render('Ideas/Index', [
+        return Inertia::render('ideas/index', [
             'ideas' => $ideas,
             'categories' => $categories,
             'filters' => $filters,
@@ -46,7 +46,7 @@ class IdeaController extends Controller
     {
         $categories = IdeaCategory::all();
 
-        return Inertia::render('Ideas/Create', [
+        return Inertia::render('ideas/create', [
             'categories' => $categories,
         ]);
     }
@@ -94,7 +94,7 @@ class IdeaController extends Controller
         $hasUpvoted = $idea->hasUserUpvoted(request()->user());
         $isCollaborator = $idea->isUserCollaborator(request()->user());
 
-        return Inertia::render('Ideas/Show', [
+        return Inertia::render('ideas/show', [
             'idea' => $idea,
             'stats' => $stats,
             'canEdit' => $canEdit,
@@ -113,7 +113,7 @@ class IdeaController extends Controller
 
         $categories = IdeaCategory::all();
 
-        return Inertia::render('Ideas/Edit', [
+        return Inertia::render('ideas/edit', [
             'idea' => $idea,
             'categories' => $categories,
         ]);

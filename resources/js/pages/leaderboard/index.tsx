@@ -78,7 +78,7 @@ export default function Index({ leaderboard, period, totalCount }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Leaderboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-8 p-4">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     {/* Period Selector */}
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
