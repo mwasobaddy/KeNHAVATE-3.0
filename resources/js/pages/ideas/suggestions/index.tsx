@@ -7,15 +7,15 @@ import {
     Plus,
     ThumbsUp,
     Reply} from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { usePrivateChannel, useChannelEvent } from '@/hooks/use-echo';
+import { Textarea } from '@/components/ui/textarea';
 
 interface User {
     id: number;
@@ -82,7 +82,7 @@ export default function Index({ idea, suggestions: initialSuggestions, stats, fi
     const channel = usePrivateChannel(`idea.${idea.id}`);
 
     // Listen for new suggestions
-    useChannelEvent(channel, '.suggestion.created', (data: any) => {
+    useChannelEvent(channel, '.suggestion.created', (data: { suggestion: Suggestion }) => {
         setSuggestions(prev => ({
             ...prev,
             data: [data.suggestion, ...prev.data]
@@ -90,7 +90,7 @@ export default function Index({ idea, suggestions: initialSuggestions, stats, fi
     });
 
     // Listen for accepted suggestions
-    useChannelEvent(channel, '.suggestion.accepted', (data: any) => {
+    useChannelEvent(channel, '.suggestion.accepted', (data: { suggestion: Suggestion }) => {
         setSuggestions(prev => ({
             ...prev,
             data: prev.data.map(suggestion =>

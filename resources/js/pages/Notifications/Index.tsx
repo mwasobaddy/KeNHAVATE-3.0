@@ -8,16 +8,14 @@ import {
     Clock,
     MessageSquare,
     ThumbsUp,
-    Users,
     UserPlus
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface User {
     id: number;
@@ -30,7 +28,7 @@ interface Notification {
     type: string;
     title: string;
     message: string;
-    data: any;
+    data: unknown;
     sender: User | null;
     notifiable_id: number;
     notifiable_type: string;
@@ -203,7 +201,7 @@ export default function Index({ notifications, unreadCount }: NotificationsIndex
                                 <CardContent className="p-6">
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-start space-x-4 flex-1">
-                                            <div className="flex-shrink-0 mt-1">
+                                            <div className="shrink-0 mt-1">
                                                 {getNotificationIcon(notification.type)}
                                             </div>
 

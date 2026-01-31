@@ -12,7 +12,7 @@ import {
     Clock,
     FileText
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -98,13 +98,13 @@ export default function Show({
     const [idea, setIdea] = useState(initialIdea);
     const [stats, setStats] = useState(initialStats);
     const [hasUpvoted, setHasUpvoted] = useState(initialHasUpvoted);
-    const [isCollaborator, setIsCollaborator] = useState(initialIsCollaborator);
+    const [isCollaborator] = useState(initialIsCollaborator);
 
     // Set up real-time channel for this idea
     const channel = usePrivateChannel(`idea.${idea.id}`);
 
     // Listen for upvotes
-    useChannelEvent(channel, '.idea.upvoted', (data: any) => {
+    useChannelEvent(channel, '.idea.upvoted', () => {
         setStats(prev => ({
             ...prev,
             total_upvotes: prev.total_upvotes + 1
@@ -112,7 +112,7 @@ export default function Show({
     });
 
     // Listen for collaborator joins
-    useChannelEvent(channel, '.collaborator.joined', (data: any) => {
+    useChannelEvent(channel, '.collaborator.joined', (data: { collaborator: User }) => {
         setStats(prev => ({
             ...prev,
             total_collaborators: prev.total_collaborators + 1
