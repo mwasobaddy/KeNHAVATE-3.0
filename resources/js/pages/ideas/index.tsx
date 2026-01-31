@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types/navigation';
 
 interface Idea {
     id: number;
@@ -75,15 +77,21 @@ export default function Index({ ideas, categories, filters }: IdeasIndexProps) {
         }
     };
 
-    return (
-        <>
-            <Head title="Ideas" />
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Ideas',
+            href: '/ideas',
+        },
+    ];
 
-            <div className="container mx-auto px-4 py-8">
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Ideas" />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-8 p-4">
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Ideas</h1>
-                        <p className="text-gray-600 mt-2">Discover and collaborate on innovative ideas</p>
+                        <h1 className="text-3xl font-bold">Ideas</h1>
+                        <p className="text-muted-foreground mt-2">Discover and collaborate on innovative ideas</p>
                     </div>
                     <Link href="/ideas/create">
                         <Button>
@@ -222,9 +230,9 @@ export default function Index({ ideas, categories, filters }: IdeasIndexProps) {
 
                 {ideas.data.length === 0 && (
                     <div className="text-center py-12">
-                        <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">No ideas found</h3>
-                        <p className="text-gray-500 mb-4">
+                        <MessageSquare className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium mb-2">No ideas found</h3>
+                        <p className="text-muted-foreground mb-4">
                             {filters.search || filters.category_id || filters.status
                                 ? 'Try adjusting your filters to see more ideas.'
                                 : 'Be the first to submit an idea and start the collaboration!'}
@@ -240,6 +248,6 @@ export default function Index({ ideas, categories, filters }: IdeasIndexProps) {
 
                 {/* Pagination would go here */}
             </div>
-        </>
+        </AppLayout>
     );
 }

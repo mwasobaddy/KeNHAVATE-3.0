@@ -8,6 +8,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types/navigation';
 import { Textarea } from '@/components/ui/textarea';
 
 interface Category {
@@ -39,23 +41,32 @@ export default function Create({ categories }: CreateIdeaProps) {
             },
         });
     };
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Ideas',
+            href: '/ideas',
+        },
+        {
+            title: 'Submit New Idea',
+            href: '/ideas/create',
+        },
+    ];
 
     return (
-        <>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Submit New Idea" />
-
-            <div className="container mx-auto px-4 py-8 max-w-4xl">
-                <div className="flex items-center mb-8">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-8 p-4">
+                <div className="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 className="text-3xl font-bold">Submit New Idea</h1>
+                        <p className="text-muted-foreground mt-2">Share your innovative idea and get feedback from the community</p>
+                    </div>
                     <Link href="/ideas">
-                        <Button variant="ghost" size="sm" className="mr-4">
+                        <Button variant="default" size="sm" className="mr-4">
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             Back to Ideas
                         </Button>
                     </Link>
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Submit New Idea</h1>
-                        <p className="text-gray-600 mt-2">Share your innovative idea and get feedback from the community</p>
-                    </div>
                 </div>
 
                 <form onSubmit={handleSubmit}>
@@ -240,6 +251,6 @@ export default function Create({ categories }: CreateIdeaProps) {
                     </div>
                 </form>
             </div>
-        </>
+        </ AppLayout>
     );
 }
