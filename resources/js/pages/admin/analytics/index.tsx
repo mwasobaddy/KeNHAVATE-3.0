@@ -14,9 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface SystemData {
     overview: {
@@ -117,7 +117,7 @@ export default function Index() {
         return (
             <AppLayout breadcrumbs={breadcrumbs}>
                 <Head title="Analytics Dashboard" />
-                <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-8 p-4">
+                <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-12 p-4">
                 <div className="flex items-center justify-center min-h-screen">
                     <RefreshCw className="h-8 w-8 animate-spin" />
                 </div>
@@ -129,7 +129,7 @@ export default function Index() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Analytics Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-8 p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-12 p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>

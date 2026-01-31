@@ -55,7 +55,7 @@ export default function Create({ categories }: CreateIdeaProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Submit New Idea" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-8 p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-12 p-4">
                 <div className="flex justify-between items-center mb-8">
                     <div>
                         <h1 className="text-3xl font-bold">Submit New Idea</h1>

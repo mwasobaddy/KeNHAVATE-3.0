@@ -16,6 +16,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
 
 interface User {
     id: number;
@@ -114,19 +116,24 @@ export default function Index({ notifications, unreadCount }: NotificationsIndex
         if (typeFilter !== 'all' && notification.type !== typeFilter) return false;
         return true;
     });
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Notifications',
+            href: 'notifications',
+        },
+    ];
 
     return (
-        <>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Notifications" />
-
-            <div className="container mx-auto px-4 py-8 max-w-4xl">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-12 p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center">
-                        <Bell className="w-8 h-8 mr-3 text-gray-600" />
+                        <Bell className="w-8 h-8 mr-3" />
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
-                            <p className="text-gray-600 mt-1">
+                            <h1 className="text-3xl font-bold">Notifications</h1>
+                            <p className="text-muted-foreground mt-1">
                                 {unreadCount > 0 ? (
                                     <>You have <span className="font-semibold text-blue-600">{unreadCount}</span> unread notification{unreadCount !== 1 ? 's' : ''}</>
                                 ) : (
@@ -186,9 +193,9 @@ export default function Index({ notifications, unreadCount }: NotificationsIndex
                     {filteredNotifications.length === 0 ? (
                         <Card>
                             <CardContent className="py-12 text-center">
-                                <Bell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
-                                <p className="text-gray-500">
+                                <Bell className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+                                <h3 className="text-lg font-medium mb-2">No notifications</h3>
+                                <p className="text-muted-foreground">
                                     {filter === 'unread' ? 'You have no unread notifications.' :
                                      filter === 'read' ? 'You have no read notifications.' :
                                      'You haven\'t received any notifications yet.'}
@@ -277,6 +284,6 @@ export default function Index({ notifications, unreadCount }: NotificationsIndex
 
                 {/* Pagination would go here if needed */}
             </div>
-        </>
+        </ AppLayout>
     );
 }

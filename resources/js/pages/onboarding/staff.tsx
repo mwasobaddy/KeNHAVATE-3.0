@@ -19,7 +19,7 @@ export default function StaffOnboarding() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Onboarding" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-12 p-4">
                 <Form
                     {...store.form()}
                     resetOnSuccess={['password']}
