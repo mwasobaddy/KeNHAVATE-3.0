@@ -98,8 +98,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('analytics', function () {
         return Inertia::render('analytics/dashboard');
     })->name('analytics.index');
-    Route::get('analytics/dashboard', [App\Http\Controllers\AnalyticsController::class, 'userDashboard'])->name('analytics.dashboard');
+    Route::get('analytics/dashboard', function () {
+        return Inertia::render('analytics/dashboard');
+    })->name('analytics.dashboard');
     Route::get('analytics/realtime', [App\Http\Controllers\AnalyticsController::class, 'realtime'])->name('analytics.realtime');
+    Route::get('api/analytics/dashboard', [App\Http\Controllers\AnalyticsController::class, 'userDashboard'])->name('api.analytics.dashboard');
 
     // Admin Analytics Routes
     Route::middleware('can:viewAnalytics,App\\Models\\User')->group(function () {

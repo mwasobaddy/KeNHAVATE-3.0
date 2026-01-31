@@ -45,7 +45,7 @@ export default function Dashboard() {
     const loadAnalyticsData = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`/analytics/dashboard?days=${timeRange}`);
+            const response = await fetch(`/api/analytics/dashboard?days=${timeRange}`);
             const data = await response.json();
             setAnalyticsData(data);
         } catch (error) {
