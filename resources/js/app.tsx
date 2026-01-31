@@ -93,5 +93,5 @@ if (pusherKey && pusherKey !== 'local' && pusherCluster && pusherCluster !== 'lo
         }),
         leave: () => ({}),
         leaveChannel: () => ({})
-    } as any;
+    } as unknown;
 }
