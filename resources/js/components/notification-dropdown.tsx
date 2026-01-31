@@ -1,7 +1,6 @@
 import { Link, router } from '@inertiajs/react';
-import { Bell, Check, ExternalLink, Settings } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Bell, Check, ExternalLink, MessageSquare, Settings, ThumbsUp, UserPlus } from 'lucide-react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,9 +19,11 @@ interface User {
     email: string;
 }
 
+type NotificationType = 'suggestion_created' | 'suggestion_accepted' | 'idea_upvoted' | 'collaborator_joined' | string;
+
 interface Notification {
     id: number;
-    type: string;
+    type: NotificationType;
     title: string;
     message: string;
     sender: User | null;
@@ -52,9 +53,19 @@ export function NotificationDropdown({ unreadCount, recentNotifications = [] }: 
         }
     };
 
-    const getNotificationIcon = (type: string) => {
-        // Return appropriate icon based on type
-        return <Bell className="w-4 h-4" />;
+    const getNotificationIcon = (type: NotificationType): React.ReactElement => {
+        switch (type) {
+            case 'suggestion_created':
+                return <MessageSquare className="w-4 h-4 text-blue-500" />;
+            case 'suggestion_accepted':
+                return <Check className="w-4 h-4 text-green-500" />;
+            case 'idea_upvoted':
+                return <ThumbsUp className="w-4 h-4 text-purple-500" />;
+            case 'collaborator_joined':
+                return <UserPlus className="w-4 h-4 text-orange-500" />;
+            default:
+                return <Bell className="w-4 h-4 text-gray-500" />;
+        }
     };
 
     return (
@@ -98,7 +109,7 @@ export function NotificationDropdown({ unreadCount, recentNotifications = [] }: 
                                 onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
                             >
                                 <div className="flex items-start space-x-3 w-full">
-                                    <div className="flex-shrink-0 mt-0.5">
+                                    <div className="shrink-0 mt-0.5">
                                         {getNotificationIcon(notification.type)}
                                     </div>
 
@@ -108,7 +119,7 @@ export function NotificationDropdown({ unreadCount, recentNotifications = [] }: 
                                                 {notification.title}
                                             </p>
                                             {!notification.is_read && (
-                                                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 ml-2" />
+                                                <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0 ml-2" />
                                             )}
                                         </div>
 
