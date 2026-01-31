@@ -1,12 +1,4 @@
-import React, { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
-import { router } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import {
     BarChart3,
     TrendingUp,
@@ -15,21 +7,61 @@ import {
     Target,
     Download,
     RefreshCw,
-    Calendar,
     Activity
 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types/navigation';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+interface SystemData {
+    overview: {
+        total_users: number;
+        active_users: number;
+        engagement_rate: number;
+        total_ideas: number;
+    };
+    metrics: {
+        total_logins: number;
+        total_ideas_created: number;
+        total_suggestions: number;
+        total_points_awarded: number;
+        average_engagement_score: number;
+    };
+    top_contributors: Array<{
+        user: {
+            id: number;
+            name: string;
+        };
+        total_points: number;
+    }>;
+}
+
+interface IdeaData {
+    status_breakdown: Record<string, number>;
+    performance_metrics: {
+        avg_time_to_first_collaboration: number | null;
+        avg_collaboration_rate: number;
+        avg_acceptance_rate: number;
+    };
+    overview?: {
+        ideas_with_collaboration: number;
+        total_ideas: number;
+    };
+}
 
 export default function Index() {
     const [activeTab, setActiveTab] = useState('overview');
     const [timeRange, setTimeRange] = useState('30');
-    const [systemData, setSystemData] = useState(null);
-    const [ideaData, setIdeaData] = useState(null);
+    const [systemData, setSystemData] = useState<SystemData | null>(null);
+    const [ideaData, setIdeaData] = useState<IdeaData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadAnalyticsData();
-    }, [timeRange]);
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const loadAnalyticsData = async () => {
         setLoading(true);
         try {
@@ -50,7 +82,11 @@ export default function Index() {
         }
     };
 
-    const handleExport = async (format) => {
+    useEffect(() => {
+        loadAnalyticsData();
+    }, [loadAnalyticsData, timeRange]);
+
+    const handleExport = async (format: string) => {
         try {
             const response = await fetch(`/admin/analytics/export?type=system_overview&format=${format}&days=${timeRange}`);
             const data = await response.json();
@@ -70,21 +106,30 @@ export default function Index() {
         }
     };
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Analytics Dashboard',
+            href: 'admin/analytics',
+        },
+    ];
+
     if (loading) {
         return (
-            <AuthenticatedLayout>
+            <AppLayout breadcrumbs={breadcrumbs}>
+                <Head title="Analytics Dashboard" />
+                <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center justify-center min-h-screen">
                     <RefreshCw className="h-8 w-8 animate-spin" />
                 </div>
-            </AuthenticatedLayout>
+                </div>
+            </AppLayout>
         );
     }
 
     return (
-        <AuthenticatedLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Analytics Dashboard" />
-
-            <div className="space-y-6">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -315,7 +360,7 @@ export default function Index() {
                                             <div>
                                                 <h4 className="font-medium">Engagement Analysis</h4>
                                                 <p className="text-sm text-muted-foreground">
-                                                    {systemData?.overview?.engagement_rate > 70
+                                                    {(systemData?.overview?.engagement_rate ?? 0) > 70
                                                         ? "Excellent user engagement! The gamification system is working well."
                                                         : "Consider implementing more interactive features to boost engagement."
                                                     }
@@ -330,7 +375,7 @@ export default function Index() {
                                             <div>
                                                 <h4 className="font-medium">Growth Opportunities</h4>
                                                 <p className="text-sm text-muted-foreground">
-                                                    {ideaData?.overview?.ideas_with_collaboration > ideaData?.overview?.total_ideas * 0.5
+                                                    {(ideaData?.overview?.ideas_with_collaboration ?? 0) > (ideaData?.overview?.total_ideas ?? 0) * 0.5
                                                         ? "Great collaboration rate! Users are actively working together."
                                                         : "Encourage more collaboration by highlighting successful team efforts."
                                                     }
@@ -344,6 +389,6 @@ export default function Index() {
                     </TabsContent>
                 </Tabs>
             </div>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }

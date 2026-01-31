@@ -1,32 +1,47 @@
-import React, { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
     TrendingUp,
     Target,
     Award,
-    Calendar,
     RefreshCw,
     BarChart3,
     Users,
     Lightbulb,
     ThumbsUp
 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types';
+import { Progress } from '@/components/ui/progress';
+
+interface AnalyticsData {
+    metrics: {
+        total_points_earned: number;
+        total_ideas_created: number;
+        total_suggestions: number;
+        avg_engagement_score: number;
+        total_logins: number;
+        total_upvotes_given: number;
+        total_collaborations: number;
+        total_time_spent: number;
+        total_upvotes_received: number;
+    };
+    user: {
+        rank: number;
+        achievements: unknown[];
+    };
+    insights: string[];
+}
 
 export default function Dashboard() {
     const [timeRange, setTimeRange] = useState('30');
-    const [analyticsData, setAnalyticsData] = useState(null);
+    const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadAnalyticsData();
-    }, [timeRange]);
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const loadAnalyticsData = async () => {
         setLoading(true);
         try {
@@ -40,23 +55,34 @@ export default function Dashboard() {
         }
     };
 
+    useEffect(() => {
+        loadAnalyticsData();
+    }, [loadAnalyticsData, timeRange]);
+    
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Analytics Dashboard',
+            href: 'analytics/dashboard',
+        },
+    ];
+
     if (loading) {
         return (
-            <AuthenticatedLayout>
-                <div className="flex items-center justify-center min-h-screen">
-                    <RefreshCw className="h-8 w-8 animate-spin" />
-                </div>
-            </AuthenticatedLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Analytics Dashboard" />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <RefreshCw className="h-8 w-8 animate-spin" />
+            </div>
+        </AppLayout>
         );
     }
 
     const data = analyticsData;
 
     return (
-        <AuthenticatedLayout>
-            <Head title="My Analytics" />
-
-            <div className="space-y-6">
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Analytics Dashboard" />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -220,7 +246,7 @@ export default function Dashboard() {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-3">
-                                {data.insights.map((insight, index) => (
+                                {data.insights.map((insight: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>> | Iterable<React.ReactNode> | null | undefined> | null | undefined, index: React.Key | null | undefined) => (
                                     <div key={index} className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                         <p className="text-sm text-blue-800">{insight}</p>
                                     </div>
@@ -245,6 +271,6 @@ export default function Dashboard() {
                     </CardContent>
                 </Card>
             </div>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }

@@ -1,30 +1,48 @@
-import React, { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { TrophyIcon, StarIcon, FireIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { Trophy, Star, Flame, Users } from 'lucide-react';
+import React, { useState } from 'react';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types/navigation';
 
-export default function Index({ leaderboard, period, totalCount }) {
-    const [selectedPeriod, setSelectedPeriod] = useState(period || 'all');
+interface LeaderboardEntry {
+    rank: number;
+    user: {
+        id: number;
+        name: string;
+    };
+    designation: string;
+    department: string;
+    total_points: number;
+}
+
+interface Props {
+    leaderboard: LeaderboardEntry[];
+    period: string;
+    totalCount: number;
+}
+
+export default function Index({ leaderboard, period, totalCount }: Props) {
+    const [selectedPeriod, setSelectedPeriod] = useState<string>(period || 'all');
     const [loading, setLoading] = useState(false);
 
     const periods = [
-        { value: 'all', label: 'All Time', icon: TrophyIcon },
-        { value: 'year', label: 'This Year', icon: StarIcon },
-        { value: 'month', label: 'This Month', icon: FireIcon },
-        { value: 'week', label: 'This Week', icon: UserGroupIcon },
+        { value: 'all', label: 'All Time', icon: Trophy },
+        { value: 'year', label: 'This Year', icon: Star },
+        { value: 'month', label: 'This Month', icon: Flame },
+        { value: 'week', label: 'This Week', icon: Users },
     ];
 
-    const handlePeriodChange = (period) => {
+    const handlePeriodChange = (period: string) => {
         setSelectedPeriod(period);
         setLoading(true);
-        router.get(route('leaderboard', { period }), {}, {
+        router.get('leaderboard', { period }, {
             preserveState: true,
             onFinish: () => setLoading(false),
         });
     };
 
-    const getRankIcon = (rank) => {
+    const getRankIcon = (rank: number) => {
         switch (rank) {
             case 1:
                 return '🥇';
@@ -37,7 +55,7 @@ export default function Index({ leaderboard, period, totalCount }) {
         }
     };
 
-    const getRankColor = (rank) => {
+    const getRankColor = (rank: number) => {
         switch (rank) {
             case 1:
                 return 'text-yellow-600 bg-yellow-50';
@@ -49,18 +67,18 @@ export default function Index({ leaderboard, period, totalCount }) {
                 return 'text-gray-600 bg-gray-50';
         }
     };
+    
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Leaderboard',
+            href: 'leaderboard',
+        },
+    ];
 
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                    🏆 Leaderboard
-                </h2>
-            }
-        >
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Leaderboard" />
-
-            <div className="py-12">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     {/* Period Selector */}
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
@@ -110,7 +128,7 @@ export default function Index({ leaderboard, period, totalCount }) {
                                 </div>
                             ) : leaderboard.length === 0 ? (
                                 <div className="text-center py-12">
-                                    <TrophyIcon className="mx-auto h-12 w-12 text-gray-400" />
+                                    <Trophy className="mx-auto h-12 w-12 text-gray-400" />
                                     <h3 className="mt-2 text-sm font-medium text-gray-900">No participants yet</h3>
                                     <p className="mt-1 text-sm text-gray-500">
                                         Start contributing to see the leaderboard!
@@ -118,12 +136,12 @@ export default function Index({ leaderboard, period, totalCount }) {
                                 </div>
                             ) : (
                                 <div className="space-y-2">
-                                    {leaderboard.map((entry, index) => (
+                                    {leaderboard.map((entry) => (
                                         <div
                                             key={entry.user.id}
                                             className={`flex items-center justify-between p-4 rounded-lg border ${
                                                 entry.rank <= 3
-                                                    ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200'
+                                                    ? 'bg-linear-to-r from-yellow-50 to-orange-50 border-yellow-200'
                                                     : 'bg-white border-gray-200'
                                             }`}
                                         >
@@ -134,7 +152,7 @@ export default function Index({ leaderboard, period, totalCount }) {
                                                     {getRankIcon(entry.rank)}
                                                 </div>
 
-                                                <div className="flex-shrink-0">
+                                                <div className="shrink-0">
                                                     <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                                                         <span className="text-sm font-medium text-gray-700">
                                                             {entry.user.name.charAt(0).toUpperCase()}
@@ -175,7 +193,7 @@ export default function Index({ leaderboard, period, totalCount }) {
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <div className="flex items-start space-x-3">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <div className="shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                         <span className="text-sm font-medium text-blue-600">25</span>
                                     </div>
                                     <div>
@@ -185,7 +203,7 @@ export default function Index({ leaderboard, period, totalCount }) {
                                 </div>
 
                                 <div className="flex items-start space-x-3">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <div className="shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                                         <span className="text-sm font-medium text-green-600">50</span>
                                     </div>
                                     <div>
@@ -195,7 +213,7 @@ export default function Index({ leaderboard, period, totalCount }) {
                                 </div>
 
                                 <div className="flex items-start space-x-3">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <div className="shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                                         <span className="text-sm font-medium text-purple-600">10</span>
                                     </div>
                                     <div>
@@ -205,7 +223,7 @@ export default function Index({ leaderboard, period, totalCount }) {
                                 </div>
 
                                 <div className="flex items-start space-x-3">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <div className="shrink-0 w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
                                         <span className="text-sm font-medium text-yellow-600">25</span>
                                     </div>
                                     <div>
@@ -215,7 +233,7 @@ export default function Index({ leaderboard, period, totalCount }) {
                                 </div>
 
                                 <div className="flex items-start space-x-3">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                    <div className="shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
                                         <span className="text-sm font-medium text-red-600">5</span>
                                     </div>
                                     <div>
@@ -225,7 +243,7 @@ export default function Index({ leaderboard, period, totalCount }) {
                                 </div>
 
                                 <div className="flex items-start space-x-3">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                                    <div className="shrink-0 w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
                                         <span className="text-sm font-medium text-indigo-600">15</span>
                                     </div>
                                     <div>
@@ -238,6 +256,6 @@ export default function Index({ leaderboard, period, totalCount }) {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AppLayout>
     );
 }
