@@ -36,6 +36,15 @@ A comprehensive Laravel application featuring secure authentication, role-based 
 - **Code Quality**: Laravel Pint code formatting and PSR standards
 - **Modern Frontend**: React 19 with Inertia.js for SPA experience
 
+### Recent Improvements (January 2026)
+- **Conditional Pusher Integration**: Smart WebSocket initialization that gracefully handles development environments without Pusher configuration
+- **Enhanced Select Components**: Fixed Select component validation by using proper `value` props instead of children content
+- **Carbon Type Compatibility**: Resolved Carbon date library type conflicts with union types supporting both `Carbon` and `CarbonImmutable`
+- **Inertia Response Optimization**: Separated analytics dashboard routing from API endpoints for better performance and maintainability
+- **Consistent UI Layout**: Migrated all main pages to use `AppLayout` with breadcrumbs for unified user experience
+- **Code Organization**: Reorganized import statements and standardized margin spacing (`mt-16 md:mt-12`) across components
+- **Quality Assurance**: Maintained 100% test pass rate and clean code formatting throughout development cycle
+
 ## 🛠 Tech Stack
 
 ### Backend
@@ -398,10 +407,13 @@ For support, email support@kenha.co.ke or create an issue in the repository.
 - [x] Security Features (Rate Limiting, CSRF, etc.)
 - [x] Testing Suite (49 passing tests)
 - [x] Clean Architecture & Code Quality
+- [x] Analytics Dashboard with Carbon date handling
+- [x] Consistent UI Layout with AppLayout
+- [x] Conditional Pusher WebSocket integration
 
 ### 🔄 In Progress
 - [ ] Admin Dashboard for Points Management
-- [ ] Advanced Reporting & Analytics
+- [ ] Advanced Reporting & Analytics (enhanced dashboard completed)
 - [ ] API Documentation
 - [ ] Mobile App Integration
 
