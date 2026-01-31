@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+import { BarChart3, Bell, BookOpen, Folder, LayoutGrid, Lightbulb, Menu, Search, Trophy } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,26 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Ideas',
+        href: '/ideas',
+        icon: Lightbulb,
+    },
+    {
+        title: 'Leaderboard',
+        href: '/leaderboard',
+        icon: Trophy,
+    },
+    {
+        title: 'Analytics',
+        href: '/analytics/dashboard',
+        icon: BarChart3,
+    },
+    {
+        title: 'Notifications',
+        href: '/notifications',
+        icon: Bell,
     },
 ];
 
@@ -224,7 +244,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     <Avatar className="size-8 overflow-hidden rounded-full">
                                         <AvatarImage
                                             src={auth.user.avatar}
-                                            alt={auth.user.name}
+                                            alt={auth.user.name || undefined}
                                         />
                                         <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
                                             {getInitials(auth.user.name)}
