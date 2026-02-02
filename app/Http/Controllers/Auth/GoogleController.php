@@ -26,6 +26,9 @@ class GoogleController extends Controller
 
         Auth::login($user);
 
+        // Set session variable to indicate successful Google login
+        session(['google_login_success' => true]);
+
         // Redirect to dashboard - middleware will handle onboarding check
         return redirect()->intended(route('dashboard'))->with('google_login_success', true);
     }
