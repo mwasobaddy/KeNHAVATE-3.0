@@ -1,46 +1,48 @@
 import { createInertiaApp } from '@inertiajs/react';
-import { configureEcho } from '@laravel/echo-react';
 import axios from 'axios';
+import Echo from 'laravel-echo';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import type { Channel } from 'pusher-js';
+import Pusher from 'pusher-js';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Toaster } from 'react-hot-toast';
 import '../css/app.css';
+import GlobalNotifications from './components/global-notifications';
 import { initializeTheme } from './hooks/use-appearance';
 
-// Configure Echo only if Pusher credentials are available
-if (import.meta.env.VITE_PUSHER_APP_KEY) {
-    configureEcho({
-        broadcaster: 'pusher',
-        key: import.meta.env.VITE_PUSHER_APP_KEY,
-        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
-        wsHost: import.meta.env.VITE_PUSHER_HOST ? import.meta.env.VITE_PUSHER_HOST : `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1'}.pusherapp.com`,
-        wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
-        wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
-        forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
-        enabledTransports: ['ws', 'wss'],
-        authorizer: (channel: { name: string }) => ({
-            authorize: (socketId: string, callback: (error: boolean, data?: unknown) => void) => {
-                axios.post('/broadcasting/auth', {
-                    socket_id: socketId,
-                    channel_name: channel.name
-                })
-                .then(response => {
-                    callback(false, response.data);
-                })
-                .catch(error => {
-                    callback(true, error);
-                });
-            }
-        })
-    });
+// Configure axios for CSRF and credentials
+axios.defaults.withCredentials = true;
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+axios.defaults.baseURL = window.location.origin;
+
+// Set up CSRF token for all requests
+const token = document.head.querySelector('meta[name="csrf-token"]');
+if (token) {
+    axios.defaults.headers.common['X-CSRF-TOKEN'] = (token as HTMLMetaElement).content;
 }
 
-// declare global {
-//     interface Window {
-//         // Empty interface for global window extensions
-//     }
-// }
+// Type definitions for Pusher authorization
+interface PusherAuthResponse {
+    auth: string;
+    channel_data?: string;
+}
+
+interface AuthProps {
+    user?: {
+        id: number;
+        name: string;
+        email: string;
+    } | null;
+}
+
+// Extend window interface for Pusher and Echo
+declare global {
+    interface Window {
+        Pusher: typeof Pusher;
+        Echo: Echo<'pusher'>;
+    }
+}
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -52,6 +54,65 @@ createInertiaApp({
             import.meta.glob('./pages/**/*.tsx'),
         ),
     setup({ el, App, props }) {
+        const auth = (props as { initialPage?: { props?: { auth?: AuthProps } } }).initialPage?.props?.auth as AuthProps;
+        const authUser = auth?.user;
+
+        console.log('Booting Inertia app with auth user:', authUser?.id ?? null);
+
+        // Configure Echo if Pusher credentials are available
+        if (import.meta.env.VITE_PUSHER_APP_KEY) {
+            window.Pusher = window.Pusher ?? Pusher;
+
+            if (!window.Echo) {
+                window.Echo = new Echo({
+                    broadcaster: 'pusher',
+                    key: import.meta.env.VITE_PUSHER_APP_KEY,
+                    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
+                    wsHost: 'ws.pusherapp.com',
+                    wsPort: 80,
+                    wssPort: 443,
+                    forceTLS: true,
+                    enabledTransports: ['ws', 'wss'],
+                    authorizer: (channel: Channel) => ({
+                        authorize: (socketId: string, callback: (error: Error | null, authData: PusherAuthResponse | null) => void) => {
+                            // Only attempt authentication if user is logged in
+                            if (!authUser) {
+                                callback(new Error('User not authenticated'), null);
+                                return;
+                            }
+
+                            axios.post<PusherAuthResponse>('/broadcasting/auth', {
+                                socket_id: socketId,
+                                channel_name: channel.name,
+                            })
+                            .then(response => {
+                                callback(null, response.data);
+                            })
+                            .catch((error: unknown) => {
+                                if (axios.isAxiosError(error)) {
+                                    console.error('Broadcast auth failed', {
+                                        status: error.response?.status,
+                                        data: error.response?.data,
+                                        message: error.message,
+                                    });
+                                }
+
+                                const authError = new Error(
+                                    axios.isAxiosError(error) && error.message ? error.message : 'Authentication failed'
+                                );
+
+                                callback(authError, null);
+                            });
+                        }
+                    })
+                });
+
+                console.log('Echo instance created for user:', authUser?.id ?? null);
+            } else {
+                console.log('Reusing existing Echo instance');
+            }
+        }
+
         const root = createRoot(el);
 
         root.render(
@@ -81,6 +142,7 @@ createInertiaApp({
                         },
                     }}
                 />
+                <GlobalNotifications auth={auth} />
             </StrictMode>,
         );
     },
