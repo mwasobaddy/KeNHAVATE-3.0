@@ -38,10 +38,14 @@ class SuggestionService
 
         // Queue email notifications for relevant users
         $idea = $suggestion->idea;
-        if ($idea->author_id !== $suggestion->author_id) {
+        if ($idea->author && $idea->author_id !== $suggestion->author_id) {
             $this->notificationService->queueEmailNotifications($idea->author);
         }
         foreach ($idea->collaborators as $collaborator) {
+            if (! $collaborator->user) {
+                continue;
+            }
+
             if ($collaborator->user_id !== $suggestion->author_id) {
                 $this->notificationService->queueEmailNotifications($collaborator->user);
             }

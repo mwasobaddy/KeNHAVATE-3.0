@@ -16,7 +16,15 @@ class UserOnboardingController extends Controller
 
     public function show()
     {
-        return Inertia::render('onboarding/user');
+        // Check if user just logged in with Google and show success message
+        $googleLoginSuccess = session('google_login_success', false);
+        if ($googleLoginSuccess) {
+            session()->forget('google_login_success'); // Clear it so it doesn't show again
+        }
+
+        return Inertia::render('onboarding/user', [
+            'google_login_success' => $googleLoginSuccess,
+        ]);
     }
 
     public function store(UserOnboardingRequest $request)

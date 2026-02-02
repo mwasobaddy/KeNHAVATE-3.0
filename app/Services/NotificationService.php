@@ -44,8 +44,12 @@ class NotificationService
         $idea = $suggestion->idea;
         $author = $suggestion->author;
 
+        if (! $author instanceof User || ! $idea instanceof Idea) {
+            return;
+        }
+
         // Notify idea author
-        if ($idea->author_id !== $author->id) {
+        if ($idea->author && $idea->author_id !== $author->id) {
             $this->createNotification(
                 $idea->author,
                 'suggestion_created',
@@ -59,6 +63,10 @@ class NotificationService
 
         // Notify other collaborators
         foreach ($idea->collaborators as $collaborator) {
+            if (! $collaborator->user instanceof User) {
+                continue;
+            }
+
             if ($collaborator->user_id !== $author->id && $collaborator->user_id !== $idea->author_id) {
                 $this->createNotification(
                     $collaborator->user,

@@ -171,6 +171,12 @@ class IdeaService
         // Only apply published scope if not viewing personal ideas
         if (! isset($filters['author_id'])) {
             $query->published();
+
+            // By default, only show ideas with collaboration enabled in the "all" tab
+            // unless the user explicitly chooses to see all ideas via filter
+            if (! isset($filters['collaboration_enabled'])) {
+                $query->where('collaboration_enabled', true);
+            }
         }
 
         if (isset($filters['category_id'])) {

@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Ideas;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreIdeaRequest;
 use App\Http\Requests\UpdateIdeaRequest;
 use App\Models\Idea;
@@ -85,7 +84,7 @@ class IdeaController extends Controller
             );
 
             return redirect()
-                ->route('ideas.index')
+                ->route('ideas.show', $idea)
                 ->with('success', 'Idea created successfully!');
         } catch (\Exception $e) {
             return back()
@@ -186,18 +185,17 @@ class IdeaController extends Controller
      */
     public function submit(Idea $idea): RedirectResponse
     {
-        // Temporarily bypass authorization for testing
-        // $this->authorize('update', $idea);
+        $this->authorize('update', $idea);
 
-        // if (! $idea->isDraft()) {
-        //     return back()->withErrors(['error' => 'Only draft ideas can be submitted.']);
-        // }
+        if (! $idea->isDraft()) {
+            return back()->withErrors(['error' => 'Only draft ideas can be submitted.']);
+        }
 
         try {
             $this->ideaService->submitIdea($idea);
 
             return redirect()
-                ->route('ideas.index')
+                ->route('ideas.show', $idea)
                 ->with('success', 'Idea submitted for review!');
         } catch (\Exception $e) {
             return back()
@@ -270,23 +268,6 @@ class IdeaController extends Controller
         } catch (\Exception $e) {
             return back()
                 ->withErrors(['error' => 'Failed to remove upvote. Please try again.']);
-        }
-    }
-
-    /**
-     * Allow a user to join as a collaborator.
-     */
-    public function joinCollaboration(Request $request, Idea $idea): RedirectResponse
-    {
-        $this->authorize('joinCollaboration', $idea);
-
-        try {
-            $this->ideaService->addCollaborator($idea, $request->user());
-
-            return back()->with('success', 'Successfully joined as collaborator!');
-        } catch (\Exception $e) {
-            return back()
-                ->withErrors(['error' => 'Failed to join collaboration. Please try again.']);
         }
     }
 

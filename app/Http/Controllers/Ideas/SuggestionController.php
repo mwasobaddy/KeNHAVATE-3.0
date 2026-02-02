@@ -28,7 +28,7 @@ class SuggestionController extends Controller
 
         $stats = $this->suggestionService->getSuggestionStats($idea);
 
-        return Inertia::render('Suggestions/Index', [
+        return Inertia::render('ideas/suggestions/index', [
             'idea' => $idea->load(['author', 'category']),
             'suggestions' => $suggestions,
             'stats' => $stats,
@@ -82,7 +82,7 @@ class SuggestionController extends Controller
 
         $thread = $this->suggestionService->getSuggestionThread($suggestion);
 
-        return Inertia::render('Suggestions/Show', [
+        return Inertia::render('ideas/suggestions/show', [
             'idea' => $idea->load(['author', 'category']),
             'thread' => $thread,
             'suggestion' => $suggestion,
@@ -149,7 +149,7 @@ class SuggestionController extends Controller
         $filters = $request->only(['idea_id', 'type', 'status']);
         $suggestions = $this->suggestionService->getUserSuggestions($request->user(), $filters);
 
-        return Inertia::render('Suggestions/UserSuggestions', [
+        return Inertia::render('ideas/suggestions/user-suggestions', [
             'suggestions' => $suggestions,
             'filters' => $filters,
         ]);
