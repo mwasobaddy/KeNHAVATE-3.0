@@ -7,7 +7,8 @@ use App\Events\SuggestionCreated;
 use App\Models\Idea;
 use App\Models\Suggestion;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class SuggestionService
@@ -80,7 +81,7 @@ class SuggestionService
         return $suggestion;
     }
 
-    public function getSuggestionsForIdea(Idea $idea, array $filters = []): Collection
+    public function getSuggestionsForIdea(Idea $idea, array $filters = []): EloquentCollection
     {
         $query = $idea->suggestions()->with(['author', 'replies', 'acceptedBy']);
 
@@ -132,7 +133,7 @@ class SuggestionService
             ->paginate($perPage);
     }
 
-    public function getUserSuggestions(User $user, array $filters = []): Collection
+    public function getUserSuggestions(User $user, array $filters = []): EloquentCollection
     {
         $query = $user->suggestions()->with(['idea', 'replies']);
 
