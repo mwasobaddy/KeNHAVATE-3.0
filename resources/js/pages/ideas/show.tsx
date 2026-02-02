@@ -168,6 +168,14 @@ export default function Show({
             }));
         });
 
+        channel.listen('.suggestion.created', () => {
+            console.log('Received suggestion.created event');
+            setStats(prev => ({
+                ...prev,
+                total_suggestions: prev.total_suggestions + 1
+            }));
+        });
+
         return () => {
             console.log('Cleaning up Echo listeners');
             echo.leave(`idea.${idea.id}`);
