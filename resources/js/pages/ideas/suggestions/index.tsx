@@ -15,6 +15,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
+import type { BreadcrumbItem } from '@/types/navigation';
 
 type EchoInstance = {
     private: (channel: string) => {
@@ -100,10 +102,19 @@ export default function Index({ idea, suggestions: initialSuggestions, stats, fi
 
         channel.listen('.suggestion.created', (data: { suggestion: Suggestion }) => {
             console.log('Received suggestion.created event:', data);
-            setSuggestions(prev => ({
-                ...prev,
-                data: [data.suggestion, ...prev.data]
-            }));
+            setSuggestions(prev => {
+                // Check if suggestion already exists to avoid duplicates
+                const exists = prev.data.some(suggestion => suggestion.id === data.suggestion.id);
+                if (exists) {
+                    console.log('Suggestion already exists, skipping duplicate');
+                    return prev;
+                }
+
+                return {
+                    ...prev,
+                    data: [data.suggestion, ...prev.data]
+                };
+            });
         });
 
         channel.listen('.suggestion.accepted', (data: { suggestion: Suggestion }) => {
@@ -170,13 +181,25 @@ export default function Index({ idea, suggestions: initialSuggestions, stats, fi
             case 'support': return 'default';
             default: return 'outline';
         }
-    };
-
-    return (
-        <>
-            <Head title={`Suggestions - ${idea.title}`} />
-
-            <div className="container mx-auto px-4 py-8 max-w-6xl">
+    };    const breadcrumbs: BreadcrumbItem[] = [
+            {
+                title: 'Ideas',
+                href: '/ideas',
+            },
+            {
+                title: 'Idea Details',
+                href: `/ideas/${idea.id}`,
+            },
+            {
+                title: 'Suggestions',
+                href: `/ideas/${idea.id}/suggestions`,
+            },
+        ];
+    
+        return (
+            <AppLayout breadcrumbs={breadcrumbs}>
+                <Head title="Suggestions" />
+                <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-12 p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center">
@@ -389,6 +412,6 @@ export default function Index({ idea, suggestions: initialSuggestions, stats, fi
                     </div>
                 </div>
             </div>
-        </>
+        </ AppLayout>
     );
 }
