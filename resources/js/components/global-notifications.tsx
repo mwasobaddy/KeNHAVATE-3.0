@@ -100,9 +100,9 @@ export default function GlobalNotifications({ auth }: GlobalNotificationsProps) 
             }) => {
                 console.log('Global collaborator notification received:', data);
 
-                // Don't show toast if user is currently on the idea page
-                const isOnIdeaPage = window.location.pathname.includes(`/ideas/${data.idea.id}`);
-                if (!isOnIdeaPage) {
+                // Don't show toast if user is currently on the suggestions page (where real-time updates are shown)
+                const isOnSuggestionsPage = window.location.pathname.includes(`/ideas/${data.idea.id}/suggestions`);
+                if (!isOnSuggestionsPage) {
                     showToastWithAction(
                         `${data.collaborator.name} joined your idea "${data.idea.title}" as a collaborator!`,
                         '👥',
@@ -119,8 +119,8 @@ export default function GlobalNotifications({ auth }: GlobalNotificationsProps) 
             }) => {
                 console.log('Global idea upvote notification received:', data);
 
-                const isOnIdeaPage = window.location.pathname.includes(`/ideas/${data.idea.id}`);
-                if (!isOnIdeaPage) {
+                const isOnSuggestionsPage = window.location.pathname.includes(`/ideas/${data.idea.id}/suggestions`);
+                if (!isOnSuggestionsPage) {
                     showToastWithAction(
                         `${data.user.name} upvoted your idea "${data.idea.title}"`,
                         '👍',
@@ -148,9 +148,9 @@ export default function GlobalNotifications({ auth }: GlobalNotificationsProps) 
                     : data.suggestion.content;
 
                 const ideaId = data.suggestion.idea_id;
-                const isOnSameIdea = window.location.pathname.includes(`/ideas/${ideaId}`);
+                const isOnSuggestionsPage = window.location.pathname.includes(`/ideas/${ideaId}/suggestions`);
 
-                if (!isOnSameIdea) {
+                if (!isOnSuggestionsPage) {
                     showToastWithAction(
                         `${data.suggestion.author.name} added a suggestion: "${snippet}"`,
                         '💡',
