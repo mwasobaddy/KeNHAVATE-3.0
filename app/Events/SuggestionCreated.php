@@ -28,9 +28,19 @@ class SuggestionCreated implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
-        return [
+        $channels = [
             new PrivateChannel('idea.'.$this->suggestion->idea_id),
         ];
+
+        $recipientIds = collect([$this->suggestion->idea->author_id])
+            ->merge($this->suggestion->idea->collaborators()->pluck('users.id'))
+            ->unique();
+
+        foreach ($recipientIds as $userId) {
+            $channels[] = new PrivateChannel('App.Models.User.'.$userId);
+        }
+
+        return $channels;
     }
 
     /**
@@ -51,6 +61,7 @@ class SuggestionCreated implements ShouldBroadcastNow
                 'id' => $this->suggestion->id,
                 'content' => $this->suggestion->content,
                 'type' => $this->suggestion->type,
+                'idea_id' => $this->suggestion->idea_id,
                 'author' => [
                     'id' => $this->suggestion->author->id,
                     'name' => $this->suggestion->author->name,

@@ -32,9 +32,19 @@ class IdeaUpvoted implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
-        return [
+        $channels = [
             new PrivateChannel('idea.'.$this->idea->id),
         ];
+
+        $recipientIds = collect([$this->idea->author_id])
+            ->merge($this->idea->collaborators()->pluck('users.id'))
+            ->unique();
+
+        foreach ($recipientIds as $userId) {
+            $channels[] = new PrivateChannel('App.Models.User.'.$userId);
+        }
+
+        return $channels;
     }
 
     /**

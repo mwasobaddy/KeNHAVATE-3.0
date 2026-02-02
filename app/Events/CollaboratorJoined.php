@@ -34,6 +34,7 @@ class CollaboratorJoined implements ShouldBroadcastNow
     {
         return [
             new PrivateChannel('idea.'.$this->idea->id),
+            new PrivateChannel('App.Models.User.'.$this->idea->author_id),
         ];
     }
 
