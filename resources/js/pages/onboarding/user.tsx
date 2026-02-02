@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import toast from 'react-hot-toast';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +23,12 @@ export default function UserOnboarding() {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-12 p-4">
                 <Form
                     {...store.form()}
+                    onSuccess={() => {
+                        toast.success('Profile completed successfully! Welcome to the platform.');
+                    }}
+                    onError={() => {
+                        toast.error('Failed to complete profile. Please check the form and try again.');
+                    }}
                     resetOnSuccess={['password']}
                     className="flex flex-col gap-6"
                 >

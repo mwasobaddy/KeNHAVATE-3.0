@@ -35,23 +35,23 @@ Route::get('dashboard', function () {
 
 // Ideas Routes
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('ideas', App\Http\Controllers\IdeaController::class);
+    Route::resource('ideas', App\Http\Controllers\Ideas\IdeaController::class);
 
     // Idea-specific actions
-    Route::post('ideas/{idea}/submit', [App\Http\Controllers\IdeaController::class, 'submit'])->name('ideas.submit');
-    Route::post('ideas/{idea}/collaboration/enable', [App\Http\Controllers\IdeaController::class, 'enableCollaboration'])->name('ideas.enable-collaboration');
-    Route::post('ideas/{idea}/collaboration/disable', [App\Http\Controllers\IdeaController::class, 'disableCollaboration'])->name('ideas.disable-collaboration');
-    Route::post('ideas/{idea}/upvote', [App\Http\Controllers\IdeaController::class, 'upvote'])->name('ideas.upvote');
-    Route::delete('ideas/{idea}/upvote', [App\Http\Controllers\IdeaController::class, 'removeUpvote'])->name('ideas.remove-upvote');
-    Route::post('ideas/{idea}/join-collaboration', [App\Http\Controllers\IdeaController::class, 'addCollaborator'])->name('ideas.join-collaboration');
-    Route::delete('ideas/{idea}/collaborators/{user}', [App\Http\Controllers\IdeaController::class, 'removeCollaborator'])->name('ideas.remove-collaborator');
+    Route::post('ideas/{idea}/submit', [App\Http\Controllers\Ideas\IdeaController::class, 'submit'])->name('ideas.submit');
+    Route::post('ideas/{idea}/collaboration/enable', [App\Http\Controllers\Ideas\IdeaController::class, 'enableCollaboration'])->name('ideas.enable-collaboration');
+    Route::post('ideas/{idea}/collaboration/disable', [App\Http\Controllers\Ideas\IdeaController::class, 'disableCollaboration'])->name('ideas.disable-collaboration');
+    Route::post('ideas/{idea}/upvote', [App\Http\Controllers\Ideas\IdeaController::class, 'upvote'])->name('ideas.upvote');
+    Route::delete('ideas/{idea}/upvote', [App\Http\Controllers\Ideas\IdeaController::class, 'removeUpvote'])->name('ideas.remove-upvote');
+    Route::post('ideas/{idea}/join-collaboration', [App\Http\Controllers\Ideas\IdeaController::class, 'addCollaborator'])->name('ideas.join-collaboration');
+    Route::delete('ideas/{idea}/collaborators/{user}', [App\Http\Controllers\Ideas\IdeaController::class, 'removeCollaborator'])->name('ideas.remove-collaborator');
 
     // Suggestions Routes
-    Route::get('ideas/{idea}/suggestions', [App\Http\Controllers\SuggestionController::class, 'index'])->name('ideas.suggestions.index');
-    Route::post('ideas/{idea}/suggestions', [App\Http\Controllers\SuggestionController::class, 'store'])->name('ideas.suggestions.store');
-    Route::get('ideas/{idea}/suggestions/{suggestion}', [App\Http\Controllers\SuggestionController::class, 'show'])->name('ideas.suggestions.show');
-    Route::post('ideas/{idea}/suggestions/{suggestion}/accept', [App\Http\Controllers\SuggestionController::class, 'accept'])->name('ideas.suggestions.accept');
-    Route::post('ideas/{idea}/suggestions/{suggestion}/reject', [App\Http\Controllers\SuggestionController::class, 'reject'])->name('ideas.suggestions.reject');
+    Route::get('ideas/{idea}/suggestions', [App\Http\Controllers\Ideas\SuggestionController::class, 'index'])->name('ideas.suggestions.index');
+    Route::post('ideas/{idea}/suggestions', [App\Http\Controllers\Ideas\SuggestionController::class, 'store'])->name('ideas.suggestions.store');
+    Route::get('ideas/{idea}/suggestions/{suggestion}', [App\Http\Controllers\Ideas\SuggestionController::class, 'show'])->name('ideas.suggestions.show');
+    Route::post('ideas/{idea}/suggestions/{suggestion}/accept', [App\Http\Controllers\Ideas\SuggestionController::class, 'accept'])->name('ideas.suggestions.accept');
+    Route::post('ideas/{idea}/suggestions/{suggestion}/reject', [App\Http\Controllers\Ideas\SuggestionController::class, 'reject'])->name('ideas.suggestions.reject');
 
     // Notifications Routes
     Route::get('notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
@@ -60,13 +60,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('notifications/mark-all-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     Route::delete('notifications/{id}', [App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
     // Merge Routes
-    Route::get('ideas/{idea}/merge/analyze', [App\Http\Controllers\MergeController::class, 'analyzeConflicts'])->name('ideas.merge.analyze');
-    Route::post('ideas/{idea}/merge', [App\Http\Controllers\MergeController::class, 'mergeSuggestions'])->name('ideas.merge.suggestions');
-    Route::get('ideas/{idea}/merge/history', [App\Http\Controllers\MergeController::class, 'getMergeHistory'])->name('ideas.merge.history');
-    Route::get('ideas/{idea}/merge/conflicts', [App\Http\Controllers\MergeController::class, 'getUnresolvedConflicts'])->name('ideas.merge.conflicts');
-    Route::post('merge/conflicts/{conflict}/resolve', [App\Http\Controllers\MergeController::class, 'resolveConflict'])->name('merge.conflicts.resolve');
-    Route::get('merge/conflicts/{conflict}/resolve', [App\Http\Controllers\MergeController::class, 'resolveConflict'])->name('merge.conflicts.resolve');
-    Route::get('ideas/{idea}/merge/suggestions', [App\Http\Controllers\MergeController::class, 'getMergeSuggestions'])->name('ideas.merge.suggestions');
+    Route::get('ideas/{idea}/merge/analyze', [App\Http\Controllers\Ideas\MergeController::class, 'analyzeConflicts'])->name('ideas.merge.analyze');
+    Route::post('ideas/{idea}/merge', [App\Http\Controllers\Ideas\MergeController::class, 'mergeSuggestions'])->name('ideas.merge.suggestions');
+    Route::get('ideas/{idea}/merge/history', [App\Http\Controllers\Ideas\MergeController::class, 'getMergeHistory'])->name('ideas.merge.history');
+    Route::get('ideas/{idea}/merge/conflicts', [App\Http\Controllers\Ideas\MergeController::class, 'getUnresolvedConflicts'])->name('ideas.merge.conflicts');
+    Route::post('merge/conflicts/{conflict}/resolve', [App\Http\Controllers\Ideas\MergeController::class, 'resolveConflict'])->name('merge.conflicts.resolve');
+    Route::get('merge/conflicts/{conflict}/resolve', [App\Http\Controllers\Ideas\MergeController::class, 'resolveConflict'])->name('merge.conflicts.resolve');
+    Route::get('ideas/{idea}/merge/suggestions', [App\Http\Controllers\Ideas\MergeController::class, 'getMergeSuggestions'])->name('ideas.merge.suggestions');
 
     // Points and Leaderboard Routes
     Route::get('leaderboard', function (Request $request) {

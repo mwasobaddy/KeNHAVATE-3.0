@@ -1,5 +1,6 @@
 import { Form, Head } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,9 +55,13 @@ export default function OtpVerify({ email, remainingSeconds = 60 }: Props) {
             if (response.ok) {
                 setCountdown(60);
                 setCanResend(false);
+                toast.success('New OTP sent to your email!');
+            } else {
+                toast.error('Failed to resend OTP. Please try again.');
             }
         } catch (error) {
             console.error('Failed to resend OTP:', error);
+            toast.error('Failed to resend OTP. Please check your connection and try again.');
         } finally {
             setResendLoading(false);
         }
@@ -74,9 +79,15 @@ export default function OtpVerify({ email, remainingSeconds = 60 }: Props) {
                 onError={(errors) => {
                     if (errors.otp && errors.otp.includes('Too many failed verification attempts')) {
                         setIsRateLimited(true);
+                        toast.error('Too many failed attempts. Please request a new OTP.');
+                    } else if (errors.otp) {
+                        toast.error('Invalid OTP code. Please try again.');
                     }
                 }}
-                onSuccess={() => setIsRateLimited(false)}
+                onSuccess={() => {
+                    setIsRateLimited(false);
+                    toast.success('Successfully logged in!');
+                }}
                 resetOnSuccess={['password']}
                 className="flex flex-col gap-6"
             >

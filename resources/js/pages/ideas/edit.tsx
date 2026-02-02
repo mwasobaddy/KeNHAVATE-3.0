@@ -2,6 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
 import { ArrowLeft, Save } from 'lucide-react';
 import React from 'react';
+import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
 
 interface Category {
     id: number;
@@ -48,16 +50,30 @@ export default function Edit({ idea, categories }: EditIdeaProps) {
         e.preventDefault();
         put(`/ideas/${idea.id}`, {
             onSuccess: () => {
+                toast.success('Idea updated successfully!');
                 router.visit(`/ideas/${idea.id}`);
+            },
+            onError: () => {
+                toast.error('Failed to update idea. Please check the form and try again.');
             },
         });
     };
 
-    return (
-        <>
-            <Head title={`Edit ${idea.title}`} />
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Ideas',
+            href: '/ideas',
+        },
+        {
+            title: 'Edit Idea',
+            href: `/ideas/${idea.id}/edit`,
+        },
+    ];
 
-            <div className="container mx-auto px-4 py-8 max-w-4xl">
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Edit Idea" />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-12 p-4">
                 <div className="flex items-center mb-8">
                     <Link href={`/ideas/${idea.id}`}>
                         <Button variant="ghost" size="sm" className="mr-4">
@@ -255,6 +271,6 @@ export default function Edit({ idea, categories }: EditIdeaProps) {
                     </div>
                 </form>
             </div>
-        </>
+        </AppLayout>
     );
 }
