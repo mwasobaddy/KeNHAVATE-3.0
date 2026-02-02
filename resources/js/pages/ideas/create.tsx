@@ -1,16 +1,16 @@
-import { router } from '@inertiajs/react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save } from 'lucide-react';
 import React from 'react';
+import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types/navigation';
-import { Textarea } from '@/components/ui/textarea';
 
 interface Category {
     id: number;
@@ -37,7 +37,10 @@ export default function Create({ categories }: CreateIdeaProps) {
         e.preventDefault();
         post('/ideas', {
             onSuccess: () => {
-                router.visit('/ideas');
+                // Toast will be shown by flash message on index page
+            },
+            onError: () => {
+                toast.error('Failed to submit idea. Please check the form and try again.');
             },
         });
     };

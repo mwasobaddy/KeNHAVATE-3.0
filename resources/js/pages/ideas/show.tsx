@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
     Edit,
@@ -10,15 +10,20 @@ import {
     CheckCircle,
     XCircle,
     Clock,
-    FileText
+    FileText,
+    Send
 } from 'lucide-react';
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePrivateChannel, useChannelEvent } from '@/hooks/use-echo';
+import AppLayout from '@/layouts/app-layout';
+import type { SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 
 interface User {
     id: number;
@@ -33,9 +38,12 @@ interface Category {
 
 interface Collaborator {
     id: number;
-    user: User;
-    joined_at: string;
-    contribution_points: number;
+    name: string;
+    email: string;
+    pivot: {
+        joined_at: string;
+        contribution_points: number;
+    };
 }
 
 interface Upvote {
@@ -100,6 +108,8 @@ export default function Show({
     const [hasUpvoted, setHasUpvoted] = useState(initialHasUpvoted);
     const [isCollaborator] = useState(initialIsCollaborator);
 
+    const { auth } = usePage<SharedData>().props;
+
     // Set up real-time channel for this idea
     const channel = usePrivateChannel(`idea.${idea.id}`);
 
@@ -140,6 +150,7 @@ export default function Show({
                     ...prev,
                     total_upvotes: Math.max(0, prev.total_upvotes - 1)
                 }));
+                toast.success('Upvote removed!');
             } else {
                 await router.post(`/ideas/${idea.id}/upvote`);
                 setHasUpvoted(true);
@@ -147,16 +158,25 @@ export default function Show({
                     ...prev,
                     total_upvotes: prev.total_upvotes + 1
                 }));
+                toast.success('Idea upvoted!');
             }
         } catch (error) {
             console.error('Failed to toggle upvote:', error);
+            toast.error('Failed to update upvote. Please try again.');
         } finally {
             setUpvoting(false);
         }
     };
 
     const handleJoinCollaboration = () => {
-        router.post(`/ideas/${idea.id}/join-collaboration`);
+        router.post(`/ideas/${idea.id}/join-collaboration`, {
+            onSuccess: () => {
+                toast.success('Successfully joined as collaborator!');
+            },
+            onError: () => {
+                toast.error('Failed to join collaboration. Please try again.');
+            },
+        });
     };
 
     const getStatusBadgeVariant = (status: string) => {
@@ -180,11 +200,21 @@ export default function Show({
         }
     };
 
-    return (
-        <>
-            <Head title={idea.title} />
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Ideas',
+            href: '/ideas',
+        },
+        {
+            title: 'Idea Details',
+            href: `/ideas/${idea.id}`,
+        },
+    ];
 
-            <div className="container mx-auto px-4 py-8 max-w-6xl">
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Idea Details" />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl mt-16 md:mt-12 p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center">
@@ -211,6 +241,23 @@ export default function Show({
                                     Edit
                                 </Button>
                             </Link>
+                        )}
+                        {idea.status === 'draft' && idea.author.id === auth?.user?.id && (
+                            <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => router.post(`/ideas/${idea.id}/submit`, {
+                                    onSuccess: () => {
+                                        toast.success('Idea submitted for review!');
+                                    },
+                                    onError: () => {
+                                        toast.error('Failed to submit idea. Please try again.');
+                                    },
+                                })}
+                            >
+                                <Send className="w-4 h-4 mr-2" />
+                                Submit for Review
+                            </Button>
                         )}
                     </div>
                 </div>
@@ -399,18 +446,18 @@ export default function Show({
                                                 <div className="flex items-center">
                                                     <Avatar className="w-8 h-8 mr-3">
                                                         <AvatarFallback>
-                                                            {collaborator.user.name.charAt(0).toUpperCase()}
+                                                            {collaborator.name.charAt(0).toUpperCase()}
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div>
-                                                        <p className="text-sm font-medium">{collaborator.user.name}</p>
+                                                        <p className="text-sm font-medium">{collaborator.name}</p>
                                                         <p className="text-xs text-gray-500">
-                                                            Joined {new Date(collaborator.joined_at).toLocaleDateString()}
+                                                            Joined {new Date(collaborator.pivot.joined_at).toLocaleDateString()}
                                                         </p>
                                                     </div>
                                                 </div>
                                                 <Badge variant="secondary">
-                                                    {collaborator.contribution_points} pts
+                                                    {collaborator.pivot.contribution_points} pts
                                                 </Badge>
                                             </div>
                                         ))}
@@ -442,6 +489,6 @@ export default function Show({
                     </div>
                 </div>
             </div>
-        </>
+        </ AppLayout>
     );
 }
