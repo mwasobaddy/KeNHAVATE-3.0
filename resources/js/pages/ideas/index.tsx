@@ -54,6 +54,7 @@ interface IdeasIndexProps {
         search?: string;
         sort_by?: string;
         sort_direction?: string;
+        author_id?: string;
         tab?: string;
     };
     currentTab: string;
@@ -88,12 +89,12 @@ export default function Index({ ideas, categories, filters, currentTab }: IdeasI
             )
         );
 
-        router.post(`/ideas/${ideaId}/submit`, {
+        router.post(`/ideas/${ideaId}/submit`, {}, {
             onSuccess: () => {
                 console.log('Submit success for idea:', ideaId);
                 toast.success('Idea submitted for review!');
             },
-            onError: (errors) => {
+            onError: (errors: Record<string, string>) => {
                 console.log('Submit error for idea:', ideaId, errors);
                 // Revert the optimistic update on error
                 setLocalIdeas(prevIdeas =>

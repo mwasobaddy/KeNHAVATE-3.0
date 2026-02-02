@@ -1,5 +1,4 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEcho } from '@laravel/echo-react';
 import {
     ArrowLeft,
     Edit,
@@ -14,7 +13,7 @@ import {
     FileText,
     Send
 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +23,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import type { SharedData } from '@/types';
 import type { BreadcrumbItem } from '@/types';
+
+type EchoInstance = {
+    private: (channel: string) => {
+        listen: <T = Record<string, unknown>>(event: string, callback: (data: T) => void) => void;
+    };
+    leave: (channel: string) => void;
+};
 
 interface User {
     id: number;
@@ -106,36 +112,67 @@ export default function Show({
     const [idea, setIdea] = useState(initialIdea);
     const [stats, setStats] = useState(initialStats);
     const [hasUpvoted, setHasUpvoted] = useState(initialHasUpvoted);
-    const [isCollaborator] = useState(initialIsCollaborator);
+    const [isCollaborator, setIsCollaborator] = useState(initialIsCollaborator);
 
     const { auth } = usePage<SharedData>().props;
 
     // Set up real-time listeners for this idea
-    useEcho(`idea.${idea.id}`, '.idea.upvoted', () => {
-        setStats(prev => ({
-            ...prev,
-            total_upvotes: prev.total_upvotes + 1
-        }));
-    }, [], 'private');
+    useEffect(() => {
+        const isAuthor = auth?.user?.id === idea.author.id;
+        const canListen = isAuthor || isCollaborator;
+        const echo: EchoInstance | undefined = typeof window !== 'undefined'
+            ? (window as typeof window & { Echo?: EchoInstance }).Echo
+            : undefined;
 
-    useEcho(`idea.${idea.id}`, '.collaborator.joined', (data: { collaborator: User }) => {
-        setStats(prev => ({
-            ...prev,
-            total_collaborators: prev.total_collaborators + 1
-        }));
-        setIdea(prev => ({
-            ...prev,
-            collaborators: [...prev.collaborators, {
-                id: data.collaborator.id,
-                name: data.collaborator.name,
-                email: data.collaborator.email,
-                pivot: {
-                    joined_at: new Date().toISOString(),
-                    contribution_points: 0
-                }
-            }]
-        }));
-    });
+        if (!auth?.user || !canListen || !echo) {
+            return;
+        }
+
+        console.log('Setting up Echo listeners for idea:', idea.id);
+
+        const channel = echo.private(`idea.${idea.id}`);
+
+        channel.listen('.idea.upvoted', () => {
+            console.log('Received idea.upvoted event');
+            setStats(prev => ({
+                ...prev,
+                total_upvotes: prev.total_upvotes + 1
+            }));
+        });
+
+        channel.listen('.idea.upvote_removed', () => {
+            console.log('Received idea.upvote_removed event');
+            setStats(prev => ({
+                ...prev,
+                total_upvotes: Math.max(0, prev.total_upvotes - 1)
+            }));
+        });
+
+        channel.listen('.collaborator.joined', (data: { collaborator: User }) => {
+            console.log('Received collaborator.joined event:', data);
+            setStats(prev => ({
+                ...prev,
+                total_collaborators: prev.total_collaborators + 1
+            }));
+            setIdea(prev => ({
+                ...prev,
+                collaborators: [...prev.collaborators, {
+                    id: data.collaborator.id,
+                    name: data.collaborator.name,
+                    email: data.collaborator.email,
+                    pivot: {
+                        joined_at: new Date().toISOString(),
+                        contribution_points: 0
+                    }
+                }]
+            }));
+        });
+
+        return () => {
+            console.log('Cleaning up Echo listeners');
+            echo.leave(`idea.${idea.id}`);
+        };
+    }, [auth?.user, idea.author.id, idea.id, isCollaborator]);
 
     const handleUpvote = async () => {
         if (upvoting) return;
@@ -167,15 +204,32 @@ export default function Show({
         }
     };
 
-    const handleJoinCollaboration = () => {
-        router.post(`/ideas/${idea.id}/join-collaboration`, {
-            onSuccess: () => {
-                toast.success('Successfully joined as collaborator!');
-            },
-            onError: () => {
-                toast.error('Failed to join collaboration. Please try again.');
-            },
-        });
+    const handleJoinCollaboration = async () => {
+        try {
+            await router.post(`/ideas/${idea.id}/join-collaboration`);
+            toast.success('Successfully joined as collaborator!');
+            // Update local state
+            setIsCollaborator(true);
+            setStats(prev => ({
+                ...prev,
+                total_collaborators: prev.total_collaborators + 1
+            }));
+            setIdea(prev => ({
+                ...prev,
+                collaborators: [...prev.collaborators, {
+                    id: auth.user!.id,
+                    name: auth.user!.name || 'Unknown User',
+                    email: auth.user!.email,
+                    pivot: {
+                        joined_at: new Date().toISOString(),
+                        contribution_points: 0
+                    }
+                }]
+            }));
+        } catch (error) {
+            console.error('Failed to join collaboration:', error);
+            toast.error('Failed to join collaboration. Please try again.');
+        }
     };
 
     const getStatusBadgeVariant = (status: string) => {
@@ -245,7 +299,7 @@ export default function Show({
                             <Button
                                 variant="default"
                                 size="sm"
-                                onClick={() => router.post(`/ideas/${idea.id}/submit`, {
+                                onClick={() => router.post(`/ideas/${idea.id}/submit`, {}, {
                                     onSuccess: () => {
                                         toast.success('Idea submitted for review!');
                                     },
