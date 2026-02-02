@@ -8,5 +8,9 @@ export type SharedData = {
     name: string;
     auth: Auth;
     sidebarOpen: boolean;
+    flash?: {
+        google_login_success?: boolean;
+        success?: string;
+    };
     [key: string]: unknown;
 };

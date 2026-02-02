@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import toast from 'react-hot-toast';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,12 @@ export default function Login() {
             <div className="space-y-6">
                 <Form
                     {...send.form()}
+                    onSuccess={() => {
+                        toast.success('OTP sent to your email!');
+                    }}
+                    onError={() => {
+                        toast.error('Failed to send OTP. Please check your email and try again.');
+                    }}
                     resetOnSuccess={['password']}
                     className="flex flex-col gap-6"
                 >
@@ -57,7 +64,11 @@ export default function Login() {
                     </div>
                 </div>
 
-                <a href={googleLogin.url()} className="w-full block">
+                <a 
+                    href={googleLogin.url()} 
+                    className="w-full block"
+                    onClick={() => toast.success('Redirecting to Google...')}
+                >
                     <Button variant="outline" className="w-full">
                         Sign in with Google
                     </Button>

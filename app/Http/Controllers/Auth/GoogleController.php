@@ -27,6 +27,6 @@ class GoogleController extends Controller
         Auth::login($user);
 
         // Redirect to dashboard - middleware will handle onboarding check
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended(route('dashboard'))->with('google_login_success', true);
     }
 }
