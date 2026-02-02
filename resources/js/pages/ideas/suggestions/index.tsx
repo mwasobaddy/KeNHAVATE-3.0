@@ -1,5 +1,4 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useEcho } from '@laravel/echo-react';
 import type {
     User} from 'lucide-react';
 import {
@@ -8,7 +7,7 @@ import {
     Plus,
     ThumbsUp,
     Reply} from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,6 +15,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+
+type EchoInstance = {
+    private: (channel: string) => {
+        listen: <T = Record<string, unknown>>(event: string, callback: (data: T) => void) => void;
+    };
+    leave: (channel: string) => void;
+};
 
 interface User {
     id: number;
@@ -79,23 +85,44 @@ export default function Index({ idea, suggestions: initialSuggestions, stats, fi
     const [suggestions, setSuggestions] = useState(initialSuggestions);
 
     // Set up real-time listeners for this idea
-    useEcho(`idea.${idea.id}`, '.suggestion.created', (data: { suggestion: Suggestion }) => {
-        setSuggestions(prev => ({
-            ...prev,
-            data: [data.suggestion, ...prev.data]
-        }));
-    }, [], 'private');
+    useEffect(() => {
+        const echo: EchoInstance | undefined = typeof window !== 'undefined'
+            ? (window as typeof window & { Echo?: EchoInstance }).Echo
+            : undefined;
 
-    useEcho(`idea.${idea.id}`, '.suggestion.accepted', (data: { suggestion: Suggestion }) => {
-        setSuggestions(prev => ({
-            ...prev,
-            data: prev.data.map(suggestion =>
-                suggestion.id === data.suggestion.id
-                    ? { ...suggestion, is_accepted: true, is_rejected: false }
-                    : suggestion
-            )
-        }));
-    });
+        if (!echo) {
+            return;
+        }
+
+        console.log('Setting up Echo listeners for suggestions:', idea.id);
+
+        const channel = echo.private(`idea.${idea.id}`);
+
+        channel.listen('.suggestion.created', (data: { suggestion: Suggestion }) => {
+            console.log('Received suggestion.created event:', data);
+            setSuggestions(prev => ({
+                ...prev,
+                data: [data.suggestion, ...prev.data]
+            }));
+        });
+
+        channel.listen('.suggestion.accepted', (data: { suggestion: Suggestion }) => {
+            console.log('Received suggestion.accepted event:', data);
+            setSuggestions(prev => ({
+                ...prev,
+                data: prev.data.map(suggestion =>
+                    suggestion.id === data.suggestion.id
+                        ? { ...suggestion, is_accepted: true, is_rejected: false }
+                        : suggestion
+                )
+            }));
+        });
+
+        return () => {
+            console.log('Cleaning up Echo listeners for suggestions');
+            echo.leave(`idea.${idea.id}`);
+        };
+    }, [idea.id]);
 
     const handleSubmitSuggestion = async (e: React.FormEvent) => {
         e.preventDefault();
