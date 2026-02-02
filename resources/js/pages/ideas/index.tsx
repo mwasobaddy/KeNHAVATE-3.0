@@ -64,6 +64,12 @@ export default function Index({ ideas, categories, filters, currentTab }: IdeasI
     const lastFlashMessageRef = useRef<string | null>(null);
     const [localIdeas, setLocalIdeas] = useState(ideas.data);
 
+    // Update localIdeas when ideas prop changes (e.g., when switching tabs)
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setLocalIdeas(ideas.data);
+    }, [ideas.data]);
+
     useEffect(() => {
         if (flash?.success && flash.success !== lastFlashMessageRef.current) {
             toast.success(flash.success);
@@ -221,7 +227,7 @@ export default function Index({ ideas, categories, filters, currentTab }: IdeasI
                                         <SelectValue placeholder="All Ideas" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All Ideas</SelectItem>
+                                        <SelectItem value="all">All Published Ideas</SelectItem>
                                         <SelectItem value="1">Open for Collaboration</SelectItem>
                                     </SelectContent>
                                 </Select>

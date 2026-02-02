@@ -1,4 +1,5 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
+import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { store } from '@/routes/staff/onboarding';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, SharedData } from '@/types';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -16,7 +17,22 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function StaffOnboarding() {
+interface StaffOnboardingProps {
+    google_login_success?: boolean;
+}
+
+export default function StaffOnboarding({ google_login_success }: StaffOnboardingProps) {
+    const { flash } = usePage<SharedData>().props;
+    const googleLoginToastShownRef = useRef(false);
+
+    useEffect(() => {
+        if ((flash?.google_login_success || google_login_success) && !googleLoginToastShownRef.current) {
+            toast.dismiss(); // Dismiss any existing toasts (like "Redirecting to Google...")
+            toast.success('Successfully signed in with Google!');
+            googleLoginToastShownRef.current = true;
+        }
+    }, [flash, google_login_success]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Onboarding" />

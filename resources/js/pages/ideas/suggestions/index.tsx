@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { usePrivateChannel, useChannelEvent } from '@/hooks/use-echo';
+import { useEcho } from '@laravel/echo-react';
 
 interface User {
     id: number;
@@ -78,19 +78,15 @@ export default function Index({ idea, suggestions: initialSuggestions, stats, fi
     const [submitting, setSubmitting] = useState(false);
     const [suggestions, setSuggestions] = useState(initialSuggestions);
 
-    // Set up real-time channel for this idea
-    const channel = usePrivateChannel(`idea.${idea.id}`);
-
-    // Listen for new suggestions
-    useChannelEvent(channel, '.suggestion.created', (data: { suggestion: Suggestion }) => {
+    // Set up real-time listeners for this idea
+    useEcho(`idea.${idea.id}`, '.suggestion.created', (data: { suggestion: Suggestion }) => {
         setSuggestions(prev => ({
             ...prev,
             data: [data.suggestion, ...prev.data]
         }));
-    });
+    }, [], 'private');
 
-    // Listen for accepted suggestions
-    useChannelEvent(channel, '.suggestion.accepted', (data: { suggestion: Suggestion }) => {
+    useEcho(`idea.${idea.id}`, '.suggestion.accepted', (data: { suggestion: Suggestion }) => {
         setSuggestions(prev => ({
             ...prev,
             data: prev.data.map(suggestion =>
@@ -306,11 +302,11 @@ export default function Index({ idea, suggestions: initialSuggestions, stats, fi
                                             <div className="flex items-center space-x-3">
                                                 <Avatar>
                                                     <AvatarFallback>
-                                                        {suggestion.author.name.charAt(0).toUpperCase()}
+                                                        {(suggestion.author?.name ?? 'U').charAt(0).toUpperCase()}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <p className="font-medium">{suggestion.author.name}</p>
+                                                    <p className="font-medium">{suggestion.author?.name ?? 'Unknown user'}</p>
                                                     <p className="text-sm text-gray-500">
                                                         {new Date(suggestion.created_at).toLocaleDateString()}
                                                     </p>

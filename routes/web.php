@@ -6,6 +6,7 @@ use App\Http\Controllers\Onboarding\StaffOnboardingController;
 use App\Http\Controllers\Onboarding\UserOnboardingController;
 use App\Services\PointsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -35,6 +36,11 @@ Route::get('dashboard', function () {
 
 // Ideas Routes
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Broadcasting auth route for real-time features
+    Route::post('/broadcasting/auth', function (Request $request) {
+        return Broadcast::auth($request);
+    });
+
     Route::resource('ideas', App\Http\Controllers\Ideas\IdeaController::class);
 
     // Idea-specific actions
@@ -43,7 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('ideas/{idea}/collaboration/disable', [App\Http\Controllers\Ideas\IdeaController::class, 'disableCollaboration'])->name('ideas.disable-collaboration');
     Route::post('ideas/{idea}/upvote', [App\Http\Controllers\Ideas\IdeaController::class, 'upvote'])->name('ideas.upvote');
     Route::delete('ideas/{idea}/upvote', [App\Http\Controllers\Ideas\IdeaController::class, 'removeUpvote'])->name('ideas.remove-upvote');
-    Route::post('ideas/{idea}/join-collaboration', [App\Http\Controllers\Ideas\IdeaController::class, 'addCollaborator'])->name('ideas.join-collaboration');
+    Route::post('ideas/{idea}/join-collaboration', [App\Http\Controllers\Ideas\IdeaController::class, 'joinCollaboration'])->name('ideas.join-collaboration');
     Route::delete('ideas/{idea}/collaborators/{user}', [App\Http\Controllers\Ideas\IdeaController::class, 'removeCollaborator'])->name('ideas.remove-collaborator');
 
     // Suggestions Routes

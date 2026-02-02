@@ -16,6 +16,7 @@ export default function AppSidebarLayout({
 
     useEffect(() => {
         if (flash?.google_login_success && !googleLoginToastShownRef.current) {
+            toast.dismiss(); // Dismiss any existing toasts (like "Redirecting to Google...")
             toast.success('Successfully signed in with Google!');
             googleLoginToastShownRef.current = true;
         }

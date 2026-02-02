@@ -1,4 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useEcho } from '@laravel/echo-react';
 import {
     ArrowLeft,
     Edit,
@@ -20,7 +21,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePrivateChannel, useChannelEvent } from '@/hooks/use-echo';
 import AppLayout from '@/layouts/app-layout';
 import type { SharedData } from '@/types';
 import type { BreadcrumbItem } from '@/types';
@@ -110,19 +110,15 @@ export default function Show({
 
     const { auth } = usePage<SharedData>().props;
 
-    // Set up real-time channel for this idea
-    const channel = usePrivateChannel(`idea.${idea.id}`);
-
-    // Listen for upvotes
-    useChannelEvent(channel, '.idea.upvoted', () => {
+    // Set up real-time listeners for this idea
+    useEcho(`idea.${idea.id}`, '.idea.upvoted', () => {
         setStats(prev => ({
             ...prev,
             total_upvotes: prev.total_upvotes + 1
         }));
-    });
+    }, [], 'private');
 
-    // Listen for collaborator joins
-    useChannelEvent(channel, '.collaborator.joined', (data: { collaborator: User }) => {
+    useEcho(`idea.${idea.id}`, '.collaborator.joined', (data: { collaborator: User }) => {
         setStats(prev => ({
             ...prev,
             total_collaborators: prev.total_collaborators + 1
@@ -130,10 +126,13 @@ export default function Show({
         setIdea(prev => ({
             ...prev,
             collaborators: [...prev.collaborators, {
-                id: Date.now(), // Temporary ID
-                user: data.collaborator,
-                joined_at: new Date().toISOString(),
-                contribution_points: 0
+                id: data.collaborator.id,
+                name: data.collaborator.name,
+                email: data.collaborator.email,
+                pivot: {
+                    joined_at: new Date().toISOString(),
+                    contribution_points: 0
+                }
             }]
         }));
     });
@@ -446,18 +445,18 @@ export default function Show({
                                                 <div className="flex items-center">
                                                     <Avatar className="w-8 h-8 mr-3">
                                                         <AvatarFallback>
-                                                            {collaborator.name.charAt(0).toUpperCase()}
+                                                            {collaborator.name?.charAt(0)?.toUpperCase() || '?'}
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <div>
-                                                        <p className="text-sm font-medium">{collaborator.name}</p>
+                                                        <p className="text-sm font-medium">{collaborator.name || 'Unknown User'}</p>
                                                         <p className="text-xs text-gray-500">
-                                                            Joined {new Date(collaborator.pivot.joined_at).toLocaleDateString()}
+                                                            Joined {new Date(collaborator.pivot?.joined_at || Date.now()).toLocaleDateString()}
                                                         </p>
                                                     </div>
                                                 </div>
                                                 <Badge variant="secondary">
-                                                    {collaborator.pivot.contribution_points} pts
+                                                    {collaborator.pivot?.contribution_points || 0} pts
                                                 </Badge>
                                             </div>
                                         ))}
