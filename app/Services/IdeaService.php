@@ -166,8 +166,12 @@ class IdeaService
 
     public function getIdeas(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Idea::with(['author', 'category', 'collaborators', 'upvotes'])
-            ->published();
+        $query = Idea::with(['author', 'category', 'collaborators', 'upvotes']);
+
+        // Only apply published scope if not viewing personal ideas
+        if (! isset($filters['author_id'])) {
+            $query->published();
+        }
 
         if (isset($filters['category_id'])) {
             $query->byCategory($filters['category_id']);

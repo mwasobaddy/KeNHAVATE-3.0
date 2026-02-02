@@ -122,7 +122,7 @@ class IdeaPolicy
     public function review(User $user, Idea $idea): bool
     {
         // Check if user has review permission and idea is in reviewable status
-        if (! $user->can('review ideas') || ! in_array($idea->status, ['submitted', 'under_review'])) {
+        if (! $user->can('idea.review') || ! in_array($idea->status, ['submitted', 'under_review'])) {
             return false;
         }
 
@@ -139,7 +139,7 @@ class IdeaPolicy
      */
     public function implement(User $user, Idea $idea): bool
     {
-        return $user->can('implement ideas') && $idea->status === 'approved';
+        return $user->can('idea.implement') && $idea->status === 'approved';
     }
 
     /**
