@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Events\CollaboratorJoined;
 use App\Events\IdeaUpvoted;
+use App\Events\IdeaUpvoteRemoved;
 use App\Models\Idea;
 use App\Models\IdeaRevision;
 use App\Models\User;
@@ -161,7 +162,11 @@ class IdeaService
 
     public function removeUpvote(Idea $idea, User $user): void
     {
-        $idea->upvotes()->where('user_id', $user->id)->delete();
+        $deleted = $idea->upvotes()->where('user_id', $user->id)->delete();
+
+        if ($deleted) {
+            IdeaUpvoteRemoved::dispatch($idea, $user);
+        }
     }
 
     public function getIdeas(array $filters = [], int $perPage = 15): LengthAwarePaginator
